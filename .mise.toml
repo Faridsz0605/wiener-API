@@ -1,7 +1,8 @@
 [tools]
 
 python = "3.13"
-
 uv = "latest"
+
 [env]
+
 VIRTUAL_ENV = ".venv"
