@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.DB import Post, get_async_session, init_db
@@ -16,27 +16,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# define methods
-@app.get("/posts ")
-def get_posts(limit: int = None):
-    if limit:
-        return list(text_posts.values())[:limit]
-    return text_posts
-
-
-@app.get(f"/posts/{id}")
-def get_single_post(id: int):
-    if id not in text_posts:
-        raise HTTPException(status_code=404, detail="no such post/directory")
-    return text_posts.get(id)
-
-
-@app.post("/posts")
-def create_post(post: Post) -> PostResponse:
-    new_post = {"title": post.title, "content": post.content}
-
-    text_posts[max(text_posts.keys()) + 1] = {
-        "title": post.title,
-        "content": post.content,
-    }
-    return new_post
+@app.post("/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    caption: str = Form(""),
+    session: AsyncSession = Depends(get_async_session),
+):
+    post = Post(
+        caption=caption, url="dummyurl", file_type="photo", file_name="dummy name"
+    )
